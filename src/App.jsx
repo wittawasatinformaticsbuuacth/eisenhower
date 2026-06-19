@@ -117,7 +117,11 @@ function SettingsModal({ user, isOpen, onClose, quadrantNames, onSave }) {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="modal-content"
+        onClick={(e) => e.stopPropagation()}
+        style={{ borderLeftColor: "var(--active)" }}
+      >
         <h2>Quadrant Names</h2>
         <div className="settings-form">
           {["do", "schedule", "delegate", "drop"].map((id) => (
@@ -135,7 +139,11 @@ function SettingsModal({ user, isOpen, onClose, quadrantNames, onSave }) {
         {error && <p className="settings-error">{error}</p>}
         <div className="modal-buttons">
           <button onClick={onClose}>Cancel</button>
-          <button onClick={handleSave} disabled={saving}>
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            style={{ backgroundColor: "var(--active)" }}
+          >
             {saving ? "Saving…" : "Save"}
           </button>
         </div>

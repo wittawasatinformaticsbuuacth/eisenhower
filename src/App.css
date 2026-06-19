@@ -725,41 +725,41 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 100;
 }
 
 .modal-content {
   background: var(--bg);
   border-radius: 8px;
-  padding: 16px;
-  min-width: 300px;
-  max-width: 400px;
+  padding: 10px;
+  min-width: 240px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  border-left: 4px solid;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 5px;
 }
 
 .modal-content h2 {
   margin: 0;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: 400;
 }
 
 .settings-form {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .settings-field {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
 }
 
 .settings-field label {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 600;
   color: var(--muted);
   text-transform: uppercase;
@@ -785,7 +785,6 @@ h1 {
   display: flex;
   gap: 8px;
   justify-content: flex-end;
-  margin-top: 8px;
 }
 
 .modal-buttons button {
@@ -807,7 +806,6 @@ h1 {
 }
 
 .modal-buttons button:last-child {
-  background: var(--active);
   color: white;
 }
 
@@ -822,10 +820,7 @@ h1 {
 
 .settings-error {
   margin: 0;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: var(--q1);
-  padding: 6px;
-  background: rgba(168, 46, 30, 0.1);
-  border-radius: 4px;
-  border-left: 2px solid var(--q1);
+  padding: 4px;
 }
