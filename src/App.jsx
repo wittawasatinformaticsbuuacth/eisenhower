@@ -116,10 +116,9 @@ function SettingsModal({ user, isOpen, onClose, quadrantNames, onSave }) {
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay">
       <div
         className="modal-content"
-        onClick={(e) => e.stopPropagation()}
         style={{ borderLeftColor: "var(--active)" }}
       >
         <h2>Quadrant Names</h2>
