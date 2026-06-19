@@ -85,6 +85,7 @@ const getDueDateStatus = (dateStr) => {
 function SettingsModal({ user, isOpen, onClose, quadrantNames, onSave }) {
   const [localNames, setLocalNames] = useState(quadrantNames);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     setLocalNames(quadrantNames);
@@ -96,6 +97,7 @@ function SettingsModal({ user, isOpen, onClose, quadrantNames, onSave }) {
 
   const handleSave = async () => {
     setSaving(true);
+    setError("");
     try {
       await setDoc(
         doc(db, "users", user.uid, "settings", "quadrantNames"),
@@ -105,6 +107,7 @@ function SettingsModal({ user, isOpen, onClose, quadrantNames, onSave }) {
       onClose();
     } catch (e) {
       console.error("Failed to save settings:", e);
+      setError("Failed to save settings. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -129,6 +132,7 @@ function SettingsModal({ user, isOpen, onClose, quadrantNames, onSave }) {
             </div>
           ))}
         </div>
+        {error && <p className="settings-error">{error}</p>}
         <div className="modal-buttons">
           <button onClick={onClose}>Cancel</button>
           <button onClick={handleSave} disabled={saving}>
