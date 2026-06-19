@@ -22,6 +22,7 @@
   --q3: #925e00;
   --q4-bg: #f8f8f6;
   --q4: #5a5855;
+  --q-count-border: rgba(0, 0, 0, 0.15);
   --note-delete: #ff3636;
 }
 
@@ -277,6 +278,8 @@ h1 {
 .q-count {
   font-size: 0.61rem;
   color: var(--text);
+  border: 1px solid var(--q-count-border);
+
   background: rgba(0, 0, 0, 0.1);
   border-radius: 10px;
   padding: 1px 5px;
@@ -290,7 +293,7 @@ h1 {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  border: 1.5px solid currentColor;
+  border: 1px solid currentColor;
   background: transparent;
   cursor: pointer;
   display: flex;

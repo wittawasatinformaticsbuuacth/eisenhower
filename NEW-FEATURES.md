@@ -18,7 +18,7 @@
 
 ## Workflow Improvements
 
-8. **Drag & Drop** — Drag tasks to move between quadrants (better UX)
+8. [DONE] **Drag & Drop** — Drag tasks to move between quadrants (better UX)
 9. **Keyboard Shortcuts** — e.g., `Ctrl+K` to save task quickly
 10. **Subtasks** — Break down larger tasks into smaller ones
 

@@ -249,7 +249,7 @@ function Quadrant({
             style={{ color: q.color }}
             onClick={() => onOpen(q.id)}
           >
-            +
+            ✚
           </button>
         </div>
       </div>
