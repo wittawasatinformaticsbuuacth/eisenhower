@@ -15,6 +15,8 @@ import {
   query,
   orderBy,
   serverTimestamp,
+  getDoc,
+  setDoc,
 } from "firebase/firestore";
 import { auth, db } from "./firebase";
 
@@ -80,6 +82,64 @@ const getDueDateStatus = (dateStr) => {
   return "normal";
 };
 
+function SettingsModal({ user, isOpen, onClose, quadrantNames, onSave }) {
+  const [localNames, setLocalNames] = useState(quadrantNames);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setLocalNames(quadrantNames);
+  }, [quadrantNames]);
+
+  const handleChange = (id, value) => {
+    setLocalNames((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await setDoc(
+        doc(db, "users", user.uid, "settings", "quadrantNames"),
+        localNames,
+      );
+      onSave(localNames);
+      onClose();
+    } catch (e) {
+      console.error("Failed to save settings:", e);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <h2>Quadrant Names</h2>
+        <div className="settings-form">
+          {["do", "schedule", "delegate", "drop"].map((id) => (
+            <div key={id} className="settings-field">
+              <label>{id.charAt(0).toUpperCase() + id.slice(1)}</label>
+              <input
+                type="text"
+                value={localNames[id] || ""}
+                onChange={(e) => handleChange(id, e.target.value)}
+                placeholder={`Enter name for ${id}`}
+              />
+            </div>
+          ))}
+        </div>
+        <div className="modal-buttons">
+          <button onClick={onClose}>Cancel</button>
+          <button onClick={handleSave} disabled={saving}>
+            {saving ? "Saving…" : "Save"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -130,6 +190,7 @@ function Quadrant({
   dueDate,
   onDueDateChange,
   dueDateRef,
+  quadrantNames,
 }) {
   const qTasks = tasks
     .filter((t) => t.q === q.id)
@@ -239,7 +300,7 @@ function Quadrant({
     <div className="q" style={{ background: q.bg, color: q.color }}>
       <div className="q-head" style={{ background: q.bg }}>
         <div>
-          <div className="q-name">{q.label}</div>
+          <div className="q-name">{quadrantNames[q.id] || q.label}</div>
           <div className="q-sub">{q.sub}</div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -491,6 +552,13 @@ function Matrix({ user }) {
   const [fontFamily, setFontFamily] = useState(
     () => localStorage.getItem("em-font") || "Fira Code",
   );
+  const [quadrantNames, setQuadrantNames] = useState({
+    do: "Do First",
+    schedule: "Schedule",
+    delegate: "Delegate",
+    drop: "Eliminate",
+  });
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const inputRef = useRef(null);
   const dueDateRef = useRef(null);
 
@@ -509,6 +577,22 @@ function Matrix({ user }) {
 
   const adjustFont = (d) =>
     setFontSize((f) => Math.min(30, Math.max(12, f + d)));
+
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const settingsDoc = await getDoc(
+          doc(db, "users", user.uid, "settings", "quadrantNames"),
+        );
+        if (settingsDoc.exists()) {
+          setQuadrantNames(settingsDoc.data());
+        }
+      } catch (e) {
+        console.error("Failed to load settings:", e);
+      }
+    };
+    loadSettings();
+  }, [user.uid]);
 
   useEffect(() => {
     const q = query(
@@ -570,6 +654,7 @@ function Matrix({ user }) {
     dueDate,
     onDueDateChange: setDueDate,
     dueDateRef,
+    quadrantNames,
   });
 
   return (
@@ -623,6 +708,13 @@ function Matrix({ user }) {
               A+
             </button>
           </div>
+          <button
+            className="settings-btn"
+            onClick={() => setSettingsOpen(true)}
+            title="Settings"
+          >
+            ⚙️
+          </button>
           {user.photoURL && (
             <img src={user.photoURL} alt="" className="avatar" />
           )}
@@ -632,6 +724,14 @@ function Matrix({ user }) {
           </button>
         </div>
       </header>
+
+      <SettingsModal
+        user={user}
+        isOpen={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        quadrantNames={quadrantNames}
+        onSave={setQuadrantNames}
+      />
 
       <div className="matrix-grid">
         <div />

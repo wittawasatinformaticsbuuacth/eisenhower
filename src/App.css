@@ -200,6 +200,7 @@ h1 {
   color: var(--bg);
 }
 
+.settings-btn,
 .logout-btn {
   font-family: var(--font-family);
   font-size: 0.7rem;
@@ -212,6 +213,7 @@ h1 {
   opacity: 1;
   transition: opacity 0.15s;
 }
+.settings-btn:hover,
 .logout-btn:hover {
   opacity: 1;
 }
@@ -710,4 +712,110 @@ h1 {
 ::-webkit-scrollbar-thumb {
   background: rgba(0, 0, 0, 0.12);
   border-radius: 2px;
+}
+
+/* ── Settings Modal ── */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: var(--bg);
+  border-radius: 8px;
+  padding: 16px;
+  min-width: 300px;
+  max-width: 400px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal-content h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 400;
+}
+
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settings-field label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.settings-field input {
+  font-family: var(--font-family);
+  font-size: 0.8rem;
+  padding: 5px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 5px;
+  outline: none;
+  color: var(--text);
+  background: transparent;
+}
+
+.settings-field input:focus {
+  border-color: var(--muted);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
+}
+
+.modal-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.modal-buttons button {
+  font-family: var(--font-family);
+  font-size: 0.72rem;
+  padding: 5px 12px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 5px;
+  cursor: pointer;
+  background: transparent;
+  transition:
+    background 0.15s,
+    color 0.15s;
+  color: var(--muted);
+}
+
+.modal-buttons button:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.modal-buttons button:last-child {
+  background: var(--active);
+  color: white;
+}
+
+.modal-buttons button:last-child:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.modal-buttons button:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
