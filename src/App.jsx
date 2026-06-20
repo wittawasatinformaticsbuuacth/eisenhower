@@ -185,6 +185,29 @@ function Login() {
   );
 }
 
+function UndoToast({ tasks, onUndo, onDismiss }) {
+  const taskList = Object.values(tasks);
+
+  return (
+    <div className="undo-toasts-container">
+      {taskList.map((item) => (
+        <div
+          key={item.task.id}
+          className={`undo-toast ${item.animate ? "show" : "hide"}`}
+        >
+          <span>{item.task.text}</span>
+          <button
+            onClick={() => onUndo(item.task.id)}
+            className="undo-btn"
+          >
+            Undo
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function Quadrant({
   q,
   tasks,
@@ -202,6 +225,7 @@ function Quadrant({
   onDueDateChange,
   dueDateRef,
   quadrantNames,
+  onDeleteWithUndo,
 }) {
   const qTasks = tasks
     .filter((t) => t.q === q.id)
@@ -230,7 +254,7 @@ function Quadrant({
 
   const del = (e, task) => {
     e.stopPropagation();
-    deleteDoc(doc(db, "users", uid, "tasks", task.id));
+    onDeleteWithUndo(task);
   };
 
   const moveTask = (taskId, newQuadrant) => {
@@ -570,8 +594,10 @@ function Matrix({ user }) {
     drop: "Eliminate",
   });
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [deletedTasks, setDeletedTasks] = useState({});
   const inputRef = useRef(null);
   const dueDateRef = useRef(null);
+  const deletedTasksRef = useRef({});
 
   useEffect(() => {
     document.documentElement.style.fontSize = fontSize + "px";
@@ -610,9 +636,14 @@ function Matrix({ user }) {
       collection(db, "users", user.uid, "tasks"),
       orderBy("createdAt", "asc"),
     );
-    return onSnapshot(q, (snap) =>
-      setTasks(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
-    );
+    return onSnapshot(q, (snap) => {
+      const newTasks = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      // Filter out tasks that are pending deletion
+      const filteredTasks = newTasks.filter(
+        (t) => !deletedTasksRef.current[t.id],
+      );
+      setTasks(filteredTasks);
+    });
   }, [user.uid]);
 
   useEffect(() => {
@@ -645,6 +676,74 @@ function Matrix({ user }) {
     }
   };
 
+  const deleteWithUndo = (task) => {
+    // Hide task immediately
+    setTasks((prev) => prev.filter((t) => t.id !== task.id));
+
+    // Track this task for permanent deletion
+    deletedTasksRef.current[task.id] = {
+      task,
+      timeout: null,
+    };
+
+    // Add to deleted tasks display
+    setDeletedTasks((prev) => ({
+      ...prev,
+      [task.id]: {
+        task,
+        animate: true,
+      },
+    }));
+
+    // Each task gets its own timeout
+    const timeoutId = setTimeout(() => {
+      // Only delete from Firestore if still marked for deletion
+      if (deletedTasksRef.current[task.id]) {
+        deleteDoc(doc(db, "users", user.uid, "tasks", task.id));
+        delete deletedTasksRef.current[task.id];
+        // Keep task hidden even after Firestore delete
+        setTasks((prev) => prev.filter((t) => t.id !== task.id));
+      }
+      // Remove toast (animate out)
+      setDeletedTasks((prev) => ({
+        ...prev,
+        [task.id]: {
+          ...prev[task.id],
+          animate: false,
+        },
+      }));
+      // Remove from state after animation
+      setTimeout(() => {
+        setDeletedTasks((prev) => {
+          const newState = { ...prev };
+          delete newState[task.id];
+          return newState;
+        });
+      }, 300);
+    }, 5000);
+
+    deletedTasksRef.current[task.id].timeout = timeoutId;
+  };
+
+  const undoDelete = (taskId) => {
+    const entry = deletedTasksRef.current[taskId];
+    if (entry) {
+      // Clear timeout for this specific task
+      if (entry.timeout) {
+        clearTimeout(entry.timeout);
+      }
+      // Restore task and remove from deletion queue
+      setTasks((prev) => [...prev, entry.task]);
+      delete deletedTasksRef.current[taskId];
+    }
+    // Remove toast
+    setDeletedTasks((prev) => {
+      const newState = { ...prev };
+      delete newState[taskId];
+      return newState;
+    });
+  };
+
   const today = new Date().toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",
@@ -666,6 +765,7 @@ function Matrix({ user }) {
     onDueDateChange: setDueDate,
     dueDateRef,
     quadrantNames,
+    onDeleteWithUndo: deleteWithUndo,
   });
 
   return (
@@ -755,6 +855,10 @@ function Matrix({ user }) {
         <Quadrant {...qProps(QS[2])} />
         <Quadrant {...qProps(QS[3])} />
       </div>
+
+      {Object.keys(deletedTasks).length > 0 && (
+        <UndoToast tasks={deletedTasks} onUndo={undoDelete} />
+      )}
     </div>
   );
 }
