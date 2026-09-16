@@ -1,8 +1,12 @@
 node_modules
 dist
 .env
-info.txt
 .firebase/
 .claude/
 
+info.txt
+CLAUDE.md
+DEPLOY.md
+HOWTO-UNDO.md 
 GIT-USING.md
+NEW-FEATURES.md
